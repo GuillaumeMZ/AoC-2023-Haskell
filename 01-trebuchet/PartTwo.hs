@@ -1,9 +1,4 @@
-import Data.Char (isDigit)
-
-calibration :: String -> Int
-calibration source =  
-    read [head digits, last digits] 
-        where digits = filter isDigit source
+import Common
 
 digitify :: String -> String
 digitify ('o':'n':'e':tl)         = "1" ++ digitify ("e" ++ tl)
