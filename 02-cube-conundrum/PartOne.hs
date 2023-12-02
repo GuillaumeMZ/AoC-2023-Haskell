@@ -51,4 +51,3 @@ main = do
     let validConfiguration = CubeConfiguration 12 13 14;
     
     print $ sum [fst game | game <- games, isGameValid game validConfiguration]
-    --print games
