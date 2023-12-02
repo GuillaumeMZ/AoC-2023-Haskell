@@ -11,7 +11,7 @@ data CubeConfiguration =
         red :: Int,
         green :: Int,
         blue :: Int
-    } deriving(Show, Eq, Ord)
+    } deriving(Show)
 
 type Game = (Int, [CubeConfiguration])
 
