@@ -26,6 +26,7 @@ isNumberNearSymbol number symbol =
 
 parseLine :: T.Text -> Int -> Int -> ([Number], [Symbol])
 parseLine line row column =
+    -- Use a fold here ?
     let (startingPoints, restAfterPoints) = T.span (=='.') line
         (startingNumber, restAfterNumber) = T.span isDigit line
         (symbol, restAfterSymbol)         = (T.take 1 line, T.drop 1 line)
@@ -36,8 +37,12 @@ parseLine line row column =
                                               in (followingNumbers, Symbol {srow = row, column = column, symbol = T.head symbol} : followingSymbols)
        else ([], [])
 
+-- maybe expose a simpler function like
+-- parseInput :: T.Text -> ([Number], [Symbol])
+-- which calls parseNumbersAndSymbols (T.lines input) 1
 parseNumbersAndSymbols :: [T.Text] -> Int -> ([Number], [Symbol])
 parseNumbersAndSymbols (x:xs) row = 
+    -- Use a fold here ?
     let (lineNumbers, lineSymbols) = parseLine x row 1
         (otherNumbers, otherSymbols) = parseNumbersAndSymbols xs (row + 1)
     in (lineNumbers ++ otherNumbers, lineSymbols ++ otherSymbols)
