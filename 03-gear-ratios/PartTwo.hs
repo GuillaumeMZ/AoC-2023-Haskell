@@ -4,7 +4,7 @@ import qualified Data.Text.IO as T.IO
 import Common
 
 associatedNumbers :: [Number] -> Symbol -> [Number]
-associatedNumbers numbers symbol = filter ((flip isNumberNearSymbol) symbol) numbers
+associatedNumbers numbers symbol = filter (`isNumberNearSymbol` symbol) numbers
 
 tupleize :: [a] -> (a, a)
 tupleize [v1, v2] = (v1, v2)
