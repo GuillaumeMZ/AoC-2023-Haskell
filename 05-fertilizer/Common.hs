@@ -5,21 +5,16 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T.IO
 
 data RangeMap = RangeMap {
-    sourceStart :: Int,
-    sourceEnd :: Int,
-    destinationStart :: Int,
-    destinationEnd :: Int
+    from :: (Int, Int),
+    to :: (Int, Int)
 } deriving(Show)
+
+type Section = [RangeMap]
+type Sections = [Section]
 
 data Almanac = Almanac {
     seeds :: [Int],
-    seedToSoil :: [RangeMap],
-    soilToFertilizer :: [RangeMap],
-    fertilizerToWater :: [RangeMap],
-    waterToLight :: [RangeMap],
-    lightToTemperature :: [RangeMap],
-    temperatureToHumidity :: [RangeMap],
-    humidityToLocation :: [RangeMap]
+    sections :: Sections
 } deriving(Show)
 
 parseTextToIntList :: T.Text -> [Int]
@@ -31,10 +26,8 @@ parseRangeMap source =
         sourceStart      = intList !! 1
         rangeLength      = intList !! 2
     in RangeMap {
-        sourceStart = sourceStart,
-        sourceEnd = sourceStart + rangeLength - 1,
-        destinationStart = destinationStart,
-        destinationEnd = destinationStart + rangeLength - 1
+        from = (sourceStart, sourceStart + rangeLength - 1),
+        to = (destinationStart, destinationStart + rangeLength - 1)
     }
     where intList = parseTextToIntList source
 
@@ -46,14 +39,8 @@ parseSection section = map parseRangeMap $ (tail . T.lines) section
 
 parseAlmanac :: [T.Text] -> Almanac
 parseAlmanac sections = Almanac {
-    seeds = parseSeeds $ sections !! 0,
-    seedToSoil = parseSection $ sections !! 1,
-    soilToFertilizer = parseSection $ sections !! 2,
-    fertilizerToWater = parseSection $ sections !! 3,
-    waterToLight = parseSection $ sections !! 4,
-    lightToTemperature = parseSection $ sections !! 5,
-    temperatureToHumidity = parseSection $ sections !! 6,
-    humidityToLocation = parseSection $ sections !! 7
+    seeds = parseSeeds $ head sections,
+    sections = map parseSection $ tail sections
 }
 
 (>=<) :: Int -> (Int, Int) -> Bool
@@ -61,8 +48,8 @@ value >=< (lower, higher) = value >= lower && value <= higher
 
 mapRange :: RangeMap -> Int -> Maybe Int
 mapRange rangeMap value = 
-    if not $ value >=< (sourceStart rangeMap, sourceEnd rangeMap) then Nothing
-    else Just $ destinationStart rangeMap + (value - sourceStart rangeMap)
+    if not $ value >=< from rangeMap then Nothing
+    else Just $ fst (to rangeMap) + value - fst (from rangeMap)
 
 mapRanges :: [RangeMap] -> Int -> Int
 mapRanges [] value = value
@@ -70,11 +57,4 @@ mapRanges (x:xs) value =
     fromMaybe (mapRanges xs value) (mapRange x value)
 
 seedToLocation :: Almanac -> Int -> Int
-seedToLocation almanac seed =
-    (mapRanges $ humidityToLocation almanac) .
-    (mapRanges $ temperatureToHumidity almanac) .
-    (mapRanges $ lightToTemperature almanac) .
-    (mapRanges $ waterToLight almanac) .
-    (mapRanges $ fertilizerToWater almanac) .
-    (mapRanges $ soilToFertilizer almanac) .
-    (mapRanges $ seedToSoil almanac) $ seed
+seedToLocation almanac seed = foldl (flip mapRanges) seed (sections almanac)
