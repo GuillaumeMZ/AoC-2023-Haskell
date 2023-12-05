@@ -32,9 +32,9 @@ parseRangeMap source =
         rangeLength      = intList !! 2
     in RangeMap {
         sourceStart = sourceStart,
-        sourceEnd = sourceStart + rangeLength,
+        sourceEnd = sourceStart + rangeLength - 1,
         destinationStart = destinationStart,
-        destinationEnd = destinationStart + rangeLength
+        destinationEnd = destinationStart + rangeLength - 1
     }
     where intList = parseTextToIntList source
 
