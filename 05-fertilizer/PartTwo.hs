@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 import           Data.Function ((&))
 import           Data.Maybe (fromJust, fromMaybe, isJust, mapMaybe)
 import qualified Data.Text as T
