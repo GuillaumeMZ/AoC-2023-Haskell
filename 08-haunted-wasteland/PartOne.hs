@@ -7,19 +7,19 @@ import qualified Data.Text.IO as T.IO
 
 data Move = L | R deriving (Show, Eq)
 
--- Empty should be named Self
-data BinTree a = Empty | Branch a (BinTree a) (BinTree a) deriving(Show)
+data BinTree a = Self | Branch a (BinTree a) (BinTree a) deriving(Show)
 
 leftChild :: BinTree a -> BinTree a
-leftChild tree@Empty = tree 
+leftChild tree@Self = tree 
 leftChild (Branch _ l _) = l
 
 rightChild :: BinTree a -> BinTree a
-rightChild tree@Empty = tree 
+rightChild tree@Self = tree 
 rightChild (Branch _ _ r) = r
 
 value :: BinTree a -> a
-value Empty = undefined
+value Self = undefined
+value (Branch v _ _) = v
 
 type Records = Map T.Text (T.Text, T.Text)
 type Instructions = [Move]
@@ -27,12 +27,12 @@ type Instructions = [Move]
 treeify :: T.Text -> Records -> BinTree T.Text
 treeify start records =
     let (left, right) = records ! start 
-        leftSubTree  = treeify left records
-        rightSubTree = treeify right records
+        leftSubTree   = treeify left records
+        rightSubTree  = treeify right records
     in
-    if left == right && left == start then Branch start Empty Empty
-    else if left == start then Branch start Empty rightSubTree
-    else if right == start then Branch start leftSubTree Empty
+    if left == right && left == start then Branch start Self Self
+    else if left == start then Branch start Self rightSubTree
+    else if right == start then Branch start leftSubTree Self
     else Branch start leftSubTree rightSubTree
 
 recordify :: [T.Text] -> Records
@@ -51,10 +51,11 @@ instructify source = map parseMove (T.unpack source)
 stepsToReach :: T.Text -> T.Text -> BinTree T.Text -> Instructions -> Int
 stepsToReach src dst tree instr =
     if src == dst then 0
-    else
-        let curInstr = head instr in
-        if curInstr == L then undefined
-        else undefined
+    else case head instr of
+            L -> 1 + stepsToReach (value leftSubTree) dst leftSubTree (tail instr)
+            R -> 1 + stepsToReach (value rightSubTree) dst rightSubTree (tail instr)
+    where leftSubTree  = leftChild tree
+          rightSubTree = rightChild tree
 
 main :: IO ()
 main = do 
