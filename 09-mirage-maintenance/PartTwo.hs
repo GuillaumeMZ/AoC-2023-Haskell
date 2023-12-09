@@ -4,7 +4,7 @@ import qualified Data.Text.IO as T.IO
 import Common
 
 prediction :: [[Int]] -> Int
-prediction (a:b:xs) = last a + prediction (b:xs) 
+prediction (a:b:xs) = head a - prediction (b:xs)
 prediction _ = 0
 
 main :: IO ()
